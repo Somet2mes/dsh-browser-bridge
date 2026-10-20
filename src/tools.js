@@ -271,9 +271,16 @@ export function applyCookieTool(ctx, limits) {
                 },
               },
             },
+            // localStorage 是任意 key → value 的映射。三点都很关键：
+            //   1. 不能写 properties: {} + additionalProperties: false —— 那等于
+            //      「必须是空对象」，任何非空 localStorage 都会被判非法（0.2.2 前的 bug）。
+            //   2. 不能用 additionalProperties: { type: "string" } —— DSH 的 schema
+            //      子集只接受 boolean，写成对象会在 defineTool 阶段直接报
+            //      "additionalProperties must be explicitly true or false"。
+            //   3. 值放宽成任意 JSON：页面里还可能是数字串、嵌套 JSON 字符串。
             localStorage: {
               oneOf: [
-                { type: "object", additionalProperties: false, properties: {} },
+                { type: "object", properties: {}, additionalProperties: true },
                 { type: "null" },
               ],
             },

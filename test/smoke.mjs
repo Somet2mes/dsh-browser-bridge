@@ -22,7 +22,7 @@ if (!dshToolsPath) {
   process.exit(2);
 }
 const dshTools = await import(pathToFileURL(dshToolsPath).href);
-const { assertSupportedJsonSchema, assertObjectJsonSchema } = dshTools;
+const { assertSupportedJsonSchema, assertObjectJsonSchema, validateJsonSchemaValue } = dshTools;
 
 const { resolveConfig, apply } = await import("../src/index.js");
 const {
@@ -153,6 +153,51 @@ for (const [toolName, tool] of registered) {
   }
   check(`DSH schema 接受 ${toolName}`, accepted, detail);
 }
+// 输出的**形状**校验：只用「schema 能编译」是不足以发现 bug 的。
+// 0.2.2 之前 localStorage 被声明成「空对象」，schema 合法但任何非空页面都会
+// 输出校验失败。这里对每个工具用真实形状的返回值跑一遍 DSH 的校验器。
+function validateOutput(toolName, value) {
+  const tool = registered.get(toolName);
+  const violations = validateJsonSchemaValue(tool.output.schema, value, "");
+  return violations.length === 0 ? null : violations.join("; ");
+}
+
+{
+  const tab = { tabId: 1, url: "https://example.com/", title: "Example", type: "ext_ws" };
+  const cookie = {
+    name: "sess",
+    value: "<len 32>",
+    domain: ".example.com",
+    path: "/",
+    httpOnly: true,
+    secure: true,
+  };
+  const cases = [
+    ["browser_tabs", { master: "ws://127.0.0.1:18765", count: 1, sessions: [tab], rendered: "x" }],
+    ["browser_eval", { tabId: 1, value: "42", jsonKind: "number", pending: false, rendered: "x" }],
+    ["browser_navigate", { tabId: 1, url: "https://example.com/", ok: true, rendered: "x" }],
+    [
+      "browser_install",
+      { mode: "self", master: "ws://127.0.0.1:18765", started: true, alive: true, extensionConnected: true, rendered: "x" },
+    ],
+  ];
+  for (const [toolName, value] of cases) {
+    check(`输出形状合法 ${toolName}`, validateOutput(toolName, value) === null, validateOutput(toolName, value) ?? "");
+  }
+
+  // browser_cookie 的 localStorage 是历史 bug 点，逐个形状都要过
+  const cookieBase = { url: "https://example.com/", count: 1, header: "sess=<len 32>", cookies: [cookie], rendered: "x" };
+  for (const [label, storage] of [
+    ["null（未请求 localStorage）", null],
+    ["空对象", {}],
+    ["真实键值（token 场景）", { LoginUserInfo: '{"token":"abc"}', __x: "1" }],
+    ["含非字符串值", { n: 1, nested: { a: 1 } }],
+  ]) {
+    const violations = validateOutput("browser_cookie", { ...cookieBase, localStorage: storage });
+    check(`输出形状合法 browser_cookie / localStorage=${label}`, violations === null, violations ?? "");
+  }
+}
+
 check("系统提示段注册", promptSections.has("tool:BROWSER"));
 check("browserBridge 服务暴露", Boolean(fakeCtx.browserBridge));
 

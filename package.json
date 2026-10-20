@@ -1,6 +1,6 @@
 {
   "name": "dsh-browser-bridge",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "DeepSeek Harness \u63d2\u4ef6\uff1a\u7eaf JS \u9a71\u52a8\u672c\u673a\u5df2\u767b\u5f55\u6d4f\u89c8\u5668\uff08\u81ea\u5e26 TMWebDriver \u517c\u5bb9 master\uff0c\u4e0d\u9700\u8981 python / GenericAgent\uff09\u3002\u5de5\u5177\uff1abrowser_tabs / browser_eval / browser_cookie / browser_navigate / browser_install\u3002",
   "type": "module",
   "main": "src/index.js",
@@ -64,5 +64,8 @@
   "homepage": "https://github.com/Somet2mes/dsh-browser-bridge#readme",
   "bugs": {
     "url": "https://github.com/Somet2mes/dsh-browser-bridge/issues"
+  },
+  "scripts": {
+    "test": "node test/all.mjs"
   }
 }

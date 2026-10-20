@@ -149,14 +149,13 @@ pnpm install
 ```bash
 cd plugins/dsh-browser-bridge
 
-# 0) 扩展静态检查 + 协议对齐（manifest / 图标 / 端口 / 报文类型）
-node test/extension.test.mjs
+# 全部（推荐）
+pnpm test          # 等价于 node test/all.mjs
 
-# 1) 纯 JS master 协议测试：用模拟扩展跑完整协议，不需要浏览器、不需要 python
-node test/js-master.test.mjs
-
-# 2) 插件整体：纯函数 + schema + 真桥（external 模式才会连 18766）
-node test/smoke.mjs
+# 或分开跑
+node test/extension.test.mjs   # 扩展静态检查 + 协议对齐（manifest/图标/端口/报文类型）
+node test/js-master.test.mjs   # 纯 JS master 协议（模拟扩展，不需要浏览器）
+node test/smoke.mjs            # 插件整体：纯函数 + schema + 输出形状 + 真桥
 ```
 
 `js-master.test.mjs` 覆盖：无扩展时报错可读、`ext_ready` 收会话、CDP 往返、
@@ -237,3 +236,43 @@ import("file:///Applications/DeepSeek Harness.app/Contents/Resources/app.asar/ds
     pythonPath: C:\Python312\python.exe   # 或留 python / py
     genericAgentDir: C:\path\to\GenericAgent
 ```
+
+## 0.2.2 修复：`browser_cookie` 带 `include_local_storage` 必定输出校验失败
+
+**症状**
+
+```
+Error: tool "browser_cookie" returned invalid output:
+"value.localStorage" must match exactly one oneOf branch (matched 0)
+```
+
+**原因**：输出 schema 里 `localStorage` 被写成
+
+```js
+{ type: "object", additionalProperties: false, properties: {} }
+```
+
+这等于「必须是空对象」。而 `bridge.localStorage()` 返回的是 `{key: value}` 键值表，
+只要页面的 localStorage 非空，就必然对不上。
+
+**还有一个坑**：第一反应会想改成 `additionalProperties: { type: "string" }`，
+但 DSH 的 schema 子集只接受 **boolean**：
+
+```
+schema.properties.localStorage.oneOf[0].additionalProperties must be explicitly true or false
+```
+
+所以正确写法是开放键：
+
+```js
+localStorage: {
+  oneOf: [
+    { type: "object", properties: {}, additionalProperties: true },
+    { type: "null" },
+  ],
+}
+```
+
+**为什么 0.2.1 的测试没发现**：当时只断言了「schema 能被 `defineTool` 接受」，
+没有拿真实返回值去跑输出校验。现在 `test/smoke.mjs` 会对每个工具用真实形状的值
+调用 `validateJsonSchemaValue`，并且验证过「回退到旧 schema 时这两条测试会变红」。
