@@ -11,7 +11,7 @@
 ```bash
 cd /Users/will/mi-work/mimo-swarm/plugins/dsh-browser-bridge
 npm pack --pack-destination /tmp
-# → /tmp/dsh-browser-bridge-0.2.0.tgz
+# → /tmp/dsh-browser-bridge-0.2.1.tgz
 ```
 
 把 tgz 拷到目标机器，然后在目标机器上：
@@ -26,7 +26,7 @@ import json, pathlib, os
 p = pathlib.Path(os.environ["PROFILE"]) / "package.json"
 d = json.loads(p.read_text())
 d.setdefault("dependencies", {})["dsh-browser-bridge"] =
-    "file:/absolute/path/to/dsh-browser-bridge-0.2.0.tgz"
+    "file:/absolute/path/to/dsh-browser-bridge-0.2.1.tgz"
 d.setdefault("dsh", {}).setdefault("profile", {}).setdefault("bundles", [])
 if "dsh-browser-bridge" not in d["dsh"]["profile"]["bundles"]:
     d["dsh"]["profile"]["bundles"].append("dsh-browser-bridge")
@@ -50,7 +50,7 @@ pnpm install
 
 ```bash
 cd "$HOME/.dsh/profiles/desktop"
-pnpm add -D "git+https://<host>/<user>/dsh-browser-bridge.git#v0.2.0"
+pnpm add -D "git+https://<host>/<user>/dsh-browser-bridge.git#v0.2.1"
 # 然后把 dsh-browser-bridge 加进 package.json 的 dsh.profile.bundles，重启
 ```
 
@@ -84,11 +84,15 @@ Windows 上不需要编译器）。
 
 ### 扩展怎么装
 
-把 `GenericAgent/assets/tmwd_cdp_bridge/` 整个目录拷到目标机器，然后：
+扩展已经收在插件包的 `extension/` 里（`<profile>/node_modules/dsh-browser-bridge/extension`），
+不用另外找 GenericAgent。
 
 - **Edge/Chrome**：`edge://extensions` / `chrome://extensions` → 打开「开发人员模式」→
-  「加载解压缩的扩展」→ 选那个目录。
-- 装好后它自己会去连 `ws://127.0.0.1:18765`，没连上就每 5 秒重试一次，不需要手动点。
+  「加载解压缩的扩展」→ 选中 `extension` 目录（不是它的上级）。
+- 装好后它自己会去连 `ws://127.0.0.1:18765`，没连上就每 5 秒重试，不需要手动点。
+- 页面右下角出现 `ljq_driver: 已连接` 就说明通了。
+
+详细说明（权限、排障、出处）见 [extension/README.md](extension/README.md)。
 
 ### 端口冲突
 

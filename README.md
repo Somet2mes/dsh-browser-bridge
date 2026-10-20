@@ -85,6 +85,28 @@ pnpm install
 固定版本就把 URL 换成 tag：
 `https://github.com/Somet2mes/dsh-browser-bridge/archive/refs/tags/v0.2.0.tar.gz`
 
+## 装浏览器扩展（必须）
+
+插件不带浏览器 —— 它需要一个**已登录你会话的** Edge/Chrome 里的扩展把标签页能力桥出来。
+扩展就在本仓库的 [`extension/`](extension/) 目录，安装细节见 [extension/README.md](extension/README.md)。
+
+三步：
+
+1. 找到 `extension/` 目录
+   - 已装插件包：`<profile>/node_modules/dsh-browser-bridge/extension`
+   - 或 `git clone https://github.com/Somet2mes/dsh-browser-bridge.git`
+
+2. 浏览器地址栏打开 `chrome://extensions`（Edge 是 `edge://extensions`）
+   → 打开「开发人员模式」→「加载解压缩的扩展」→ 选中 `extension` 目录
+
+3. 打开任意网页，右下角出现 `ljq_driver: 已连接` 就成了
+
+扩展连的是 `ws://127.0.0.1:18765`，会每 5 秒重试一次。
+所以**先开浏览器还是先开 DSH 都行**，插件起来后 5 秒内自动连上。
+
+> 扩展申请了 `debugger` 等权限，等价于「完全控制这个浏览器」。
+> 建议用专用 profile 登录目标站点，别装在日常账号的 profile 上。
+
 ## 配置项
 
 ```yaml
@@ -126,6 +148,9 @@ pnpm install
 
 ```bash
 cd plugins/dsh-browser-bridge
+
+# 0) 扩展静态检查 + 协议对齐（manifest / 图标 / 端口 / 报文类型）
+node test/extension.test.mjs
 
 # 1) 纯 JS master 协议测试：用模拟扩展跑完整协议，不需要浏览器、不需要 python
 node test/js-master.test.mjs

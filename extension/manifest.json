@@ -1,0 +1,52 @@
+{
+  "manifest_version": 3,
+  "name": "TMWD CDP Bridge",
+  "version": "2.0.0",
+  "description": "把本机已登录浏览器的标签页能力桥接给 dsh-browser-bridge（WebSocket ws://127.0.0.1:18765）。Cookie / CDP / 页内脚本。",
+  "permissions": [
+    "cookies",
+    "tabs",
+    "activeTab",
+    "debugger",
+    "scripting",
+    "alarms",
+    "declarativeNetRequest",
+    "management",
+    "contentSettings"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["disable_dialogs.js"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "world": "MAIN"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "TMWD CDP Bridge",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
