@@ -1,0 +1,67 @@
+{
+  "name": "dsh-browser-bridge",
+  "version": "0.2.0",
+  "description": "DeepSeek Harness \u63d2\u4ef6\uff1a\u7eaf JS \u9a71\u52a8\u672c\u673a\u5df2\u767b\u5f55\u6d4f\u89c8\u5668\uff08\u81ea\u5e26 TMWebDriver \u517c\u5bb9 master\uff0c\u4e0d\u9700\u8981 python / GenericAgent\uff09\u3002\u5de5\u5177\uff1abrowser_tabs / browser_eval / browser_cookie / browser_navigate / browser_install\u3002",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./bridge": "./src/bridge.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "cordis.patch.yml",
+    "README.md",
+    "MIGRATION.md",
+    "DISTRIBUTION.md",
+    "LICENSE"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "browser",
+    "cdp",
+    "websocket",
+    "chrome-devtools-protocol",
+    "browser-automation"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "install": {
+      "preferred": "tarball",
+      "tarball": "https://github.com/Somet2mes/dsh-browser-bridge/archive/refs/heads/main.tar.gz",
+      "zip": "https://github.com/Somet2mes/dsh-browser-bridge/archive/refs/heads/main.zip",
+      "git": "https://github.com/Somet2mes/dsh-browser-bridge.git"
+    }
+  },
+  "engines": {
+    "node": ">=20",
+    "dsh": ">=0.2.0-0 <0.3.0"
+  },
+  "dependencies": {
+    "ws": "^8.18.0",
+    "@deepseek-ai/schemastery": "~3.18.5"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-tools": ">=0.2.0-0 <0.3.0",
+    "@deepseek-ai/cordis": "*"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-tools": {
+      "optional": false
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Somet2mes/dsh-browser-bridge.git"
+  },
+  "homepage": "https://github.com/Somet2mes/dsh-browser-bridge#readme",
+  "bugs": {
+    "url": "https://github.com/Somet2mes/dsh-browser-bridge/issues"
+  }
+}

@@ -1,0 +1,31 @@
+# dsh-browser-bridge bundle patch
+#
+# 行名必须等于 npm 包名（dsh-browser-bridge）。
+#
+# 0.2.0 起默认 mode: self —— 插件自带纯 JS master 监听 18765，
+# 不需要 python、不需要 GenericAgent、不需要任何 pip 包。
+# 浏览器里的 tmwd_cdp_bridge 扩展照旧连 18765，会自动重连到这个 JS master。
+- insert:
+    - id: browser-bridge
+      name: 'dsh-browser-bridge'
+      config:
+        enabled: true
+        host: 127.0.0.1
+
+        # self     = 插件内建 JS master（默认，零 python 依赖）
+        # external = 连已有 Python TMWebDriver master 的 HTTP /link
+        mode: self
+
+        # self 模式：WebSocket 监听端口（扩展写死连 18765）
+        wsPort: 18765
+        # external 模式：Python master 的 HTTP 端口（WS 端口 + 1）
+        port: 18766
+
+        # 默认 tab 选择：URL 包含该子串（留空 = 最近活动的 tab）
+        defaultTabSearch: ''
+        # cookie 默认打码（只给名字+长度），要真值传 mask=false
+        maskCookies: true
+        maxOutputChars: 60000
+        callTimeoutMs: 60000
+        pollMs: 500
+        promptGuidance: true
