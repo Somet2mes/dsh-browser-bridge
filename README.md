@@ -49,36 +49,41 @@ Python master 其实只做一件事：收扩展的会话、把命令转给扩展
 
 ## 安装
 
-插件的行名要求等于 npm 包名。本机开发用符号链接，别复制：
+仓库：<https://github.com/Somet2mes/dsh-browser-bridge>
+
+在目标机器上（`desktop` 或 `web` profile），改 profile 的 `package.json`：
 
 ```bash
-# 1) 把插件接到 profile 的 node_modules（desktop 和 web 两个 profile 都要）
-for p in desktop web; do
-  mkdir -p ~/.dsh/profiles/$p/node_modules
-  ln -sfn /Users/will/mi-work/mimo-swarm/plugins/dsh-browser-bridge \
-          ~/.dsh/profiles/$p/node_modules/dsh-browser-bridge
-done
-
-# 2) 让 profile 把它当 bundle 挂上（写入 dsh.profile.bundles）
-#    desktop: ~/.dsh/profiles/desktop/package.json
-#    web:     ~/.dsh/profiles/web/package.json
-#    在 "dsh": { "profile": { "bundles": [...] } } 里加 "dsh-browser-bridge"
-
-# 3) 重启 DSH（desktop 关掉重开；web 重启 dsh web）
+cd "$HOME/.dsh/profiles/desktop"   # Windows: %USERPROFILE%\.dsh\profiles\desktop
 ```
 
-只想给某一个 profile 装，就只动那一个。不想改 `dsh.profile.bundles` 也可以直接用**行内联方式**——在 profile 的 `cordis.patch.yml` 里加：
+在 `dependencies` 里加：
 
-```yaml
-- insert:
-    - id: browser-bridge-local
-      name: /Users/will/mi-work/mimo-swarm/plugins/dsh-browser-bridge/src/index.js
-      config:
-        autoStart: true
-        genericAgentDir: ~/mi-work/GenericAgent
+```json
+"dsh-browser-bridge": "https://github.com/Somet2mes/dsh-browser-bridge/archive/refs/heads/main.tar.gz"
 ```
 
-（行名写成绝对路径时按 loader 的 `new URL(name, baseUrl)` 解析，等价模块级 import。）
+在 `dsh.profile.bundles` 里追加：
+
+```json
+"dsh-browser-bridge"
+```
+
+然后：
+
+```bash
+pnpm install
+# 重启 DSH
+```
+
+也可以用 GUI：设置 → 插件 → 安装，粘
+`https://github.com/Somet2mes/dsh-browser-bridge/archive/refs/heads/main.tar.gz`。
+
+**两个地方都要写**：`dependencies` 决定插件管理面板能不能看到它，
+`bundles` 决定 loader 会不会把它当 bundle 层加载。
+
+固定版本就把 URL 换成 tag：
+`https://github.com/Somet2mes/dsh-browser-bridge/archive/refs/tags/v0.2.0.tar.gz`
 
 ## 配置项
 
